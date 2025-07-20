@@ -29,17 +29,17 @@ messages = [
 
 ## 실행
 ```
-python retrievePipe.py \
-  --model_name "Qwen/Qwen2-0.5B-Instruct" \
-  --device cuda \
-  --boost_factor 2.0 \
-  --max_length 256 \
-  --temperature 0.9 \
-  --top_p 0.85 \
-  --user_query "오케스트로를 설명해줘." \
-  --chunks "대표 서비스: 클라우드, AI \n회사 위치: 파크원" \
-  --system_prompt "너는 아래 참고 내용을 바탕으로 답변해." \
-  --content_template "질문: {user_query}\n\n[참고자료]\n{chunks}\n\n답변:"
+python selective_cite_processor.py \
+    --model_name "Qwen/Qwen2-0.5B-Instruct" \
+    --device cuda \
+    --boost_factor 2.0 \
+    --max_length 256 \
+    --temperature 0.9 \
+    --top_p 0.85 \ 
+    --user_query "오케스트로를 설명해줘." \
+    --chunks "대표 서비스: 클라우드, AI \n회사 위치: 파크원" \n 전화번호: 111-111 \
+    --system_prompt "너는 아래 참고 내용을 바탕으로 답변하는 챗봇이야." \
+    --content_template "질문: {user_query}\n\n[참고자료]\n{chunks}\n\n답변:"
 ```
 ## 
 
