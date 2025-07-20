@@ -1,0 +1,11 @@
+python3 selective_cite_processor.py \
+    --model_name "Qwen/Qwen2-0.5B-Instruct" \
+    --device cpu \
+    --boost_factor 2.5 \
+    --max_length 512 \
+    --temperature 0.8 \
+    --top_p 0.85 \
+    --user_query "연차 신청은 어디서 하나요?" \
+    --chunks "연차는 그룹웨어 시스템을 통해 신청할 수 있다. 로그인 후 '근태관리 > 휴가신청' 메뉴에서 작성하면 됨. 승인 여부는 팀장이 검토한 후 알림으로 전달됨. 연차 사용 내역은 마이페이지에서 확인 가능." \
+    --system_prompt "당신은 회사 내 직원들의 질문에 답변하는 AI 도우미입니다. 아래 참고 문서를 기반으로 질문에 대해 정확하고 친절하게 답변해 주세요. 문서에 기반한 내용 외에는 추측하지 마세요.." \
+    --content_template "{user_query}\n\n[참고 문서]\n{chunks}\n\n위 내용을 참고해서 사용자 질문에 친절하고 정확하게 답변해 주세요."
