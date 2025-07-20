@@ -45,7 +45,33 @@ python3 selective_cite_processor.py \
     --system_prompt "당신은 회사 내 직원들의 질문에 답변하는 AI 도우미입니다. 아래 참고 문서를 기반으로 질문에 대해 정확하고 친절하게 답변해 주세요. 문서에 기반한 내용 외에는 추측하지 마세요.." \
     --content_template "{user_query}\n\n[참고 문서]\n{chunks}\n\n위 내용을 참고해서 사용자 질문에 친절하고 정확하게 답변해 주세요."
 ```
-## 
+## 설명
+```python
+class SelectiveCiteProcessor(LogitsProcessor):
+    """
+    LogitsProcessor that boosts the probability of tokens from the reference chunk.
+    """
+    def __init__(self, tokenizer: AutoTokenizer, chunk_token_ids: torch.Tensor, boost_factor: float = 1.0):
+        self.tokenizer = tokenizer
+        self.chunk_token_ids = chunk_token_ids
+        self.boost_factor = boost_factor
+
+    def __call__(self, input_ids: torch.Tensor, logits: torch.FloatTensor) -> torch.FloatTensor:
+        return self._cite_tokens(logits)
+
+    def _cite_tokens(self, logits: torch.FloatTensor) -> torch.FloatTensor:
+        """
+        Boost the logits of tokens present in the chunk to encourage citation.
+        """
+        vocab_size = logits.shape[1]
+        batch_size = logits.shape[0]
+        for i in range(batch_size):
+            chunk_tokens = set(self.chunk_token_ids[i].tolist()) # 설정한 구간의 토큰들의 Ids값 저장
+            chunk_tokens.add(self.tokenizer.eos_token_id) # <eos>의 경우도 다른 토큰 Logit값이 올라가면서 무시되지 않도록 Boost
+            chunk_tokens = [t for t in chunk_tokens if t < vocab_size] 
+            logits[i, chunk_tokens] += self.boost_factor # 다음 생성 후보군 Ids의 Logit을 Boost
+        return logits
+```
 
 ## Reference
 https://github.com/NVIDIA/logits-processor-zoo
