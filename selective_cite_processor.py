@@ -34,23 +34,7 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-def cite_tokens(
-    tokenizer: AutoTokenizer,
-    logits: torch.FloatTensor,
-    chunk_token_ids: torch.Tensor,
-    boost_factor: float = 1.0
-) -> torch.FloatTensor:
-    """
-    Boost the logits of tokens present in the chunk to encourage citation.
-    """
-    vocab_size = logits.shape[1]
-    batch_size = logits.shape[0]
-    for i in range(batch_size):
-        chunk_tokens = set(chunk_token_ids[i].tolist())
-        chunk_tokens.add(tokenizer.eos_token_id)
-        chunk_tokens = [t for t in chunk_tokens if t < vocab_size]
-        logits[i, chunk_tokens] += boost_factor
-    return logits
+
 
 
 class SelectiveCiteProcessor(LogitsProcessor):
@@ -63,8 +47,20 @@ class SelectiveCiteProcessor(LogitsProcessor):
         self.boost_factor = boost_factor
 
     def __call__(self, input_ids: torch.Tensor, logits: torch.FloatTensor) -> torch.FloatTensor:
-        return cite_tokens(self.tokenizer, logits, self.chunk_token_ids, self.boost_factor)
+        return self._cite_tokens(logits)
 
+    def _cite_tokens(self, logits: torch.FloatTensor) -> torch.FloatTensor:
+        """
+        Boost the logits of tokens present in the chunk to encourage citation.
+        """
+        vocab_size = logits.shape[1]
+        batch_size = logits.shape[0]
+        for i in range(batch_size):
+            chunk_tokens = set(self.chunk_token_ids[i].tolist())
+            chunk_tokens.add(self.tokenizer.eos_token_id)
+            chunk_tokens = [t for t in chunk_tokens if t < vocab_size]
+            logits[i, chunk_tokens] += self.boost_factor
+        return logits
 
 def run_inference(
     model_name: str,
@@ -131,15 +127,15 @@ def run_inference(
 def main():
     parser = argparse.ArgumentParser(description="Citation-Boosted Text Generation Experiment")
     parser.add_argument('--model_name', type=str, default="Qwen/Qwen2-0.5B-Instruct", help='HuggingFace model name')
-    parser.add_argument('--device', type=str, default=None, help='Device to use (cuda/cpu)')
-    parser.add_argument('--boost_factor', type=float, default=1.0, help='Logit boost factor for chunk tokens')
-    parser.add_argument('--max_length', type=int, default=200, help='Maximum generation length')
+    parser.add_argument('--device', type=str, default="cpu", help='Device to use (cuda/cpu)')
+    parser.add_argument('--boost_factor', type=float, default=2.5, help='Logit boost factor for chunk tokens')
+    parser.add_argument('--max_length', type=int, default=512, help='Maximum generation length')
     parser.add_argument('--temperature', type=float, default=0.8, help='Sampling temperature')
-    parser.add_argument('--top_p', type=float, default=0.95, help='Top-p sampling')
-    parser.add_argument('--user_query', type=str, default="오케스트로에 대해 알려줘", help='User query')
-    parser.add_argument('--chunks', type=str, default="오케스트로란 클라우드 회사다, 파크원에 위치해 있다, 전화번호는 111-111이다", help='Reference chunk text')
-    parser.add_argument('--system_prompt', type=str, default="아래의 내용을 참고해서 답변을 해줘", help='System prompt for the model')
-    parser.add_argument('--content_template', type=str, default="{user_query}\n\n참고: {chunks}", help='Template for user content. Use {user_query} and {chunks} as placeholders.')
+    parser.add_argument('--top_p', type=float, default=0.85, help='Top-p sampling')
+    parser.add_argument('--user_query', type=str, default="연차 신청은 어디서 하나요?", help='User query')
+    parser.add_argument('--chunks', type=str, default="연차는 그룹웨어 시스템을 통해 신청할 수 있다. 로그인 후 '근태관리 > 휴가신청' 메뉴에서 작성하면 됨. 승인 여부는 팀장이 검토한 후 알림으로 전달됨. 연차 사용 내역은 마이페이지에서 확인 가능.", help='Reference chunk text')
+    parser.add_argument('--system_prompt', type=str, default="당신은 회사 내 직원들의 질문에 답변하는 AI 도우미입니다. 아래 참고 문서를 기반으로 질문에 대해 정확하고 친절하게 답변해 주세요. 문서에 기반한 내용 외에는 추측하지 마세요..", help='System prompt for the model')
+    parser.add_argument('--content_template', type=str, default="{user_query}\n\n[참고 문서]\n{chunks}\n\n위 내용을 참고해서 사용자 질문에 친절하고 정확하게 답변해 주세요.", help='Template for user content. Use {user_query} and {chunks} as placeholders.')
     args = parser.parse_args()
 
     result = run_inference(
