@@ -12,38 +12,38 @@ SelectiveCiteProcessor는 프롬프트 중 사용자가 지정한 특정 부분�
 
 ## 예시
 ```python
---model_name "Qwen/Qwen2-0.5B-Instruct" \
---device cpu \
---boost_factor 2.5 \
---max_length 512 \
---temperature 0.8 \
---top_p 0.85 \
---user_query "연차 신청은 어디서 하나요?" \
---chunks "연차는 그룹웨어 시스템을 통해 신청할 수 있다. 로그인 후 '근태관리 > 휴가신청' 메뉴에서 작성하면 됨. 승인 여부는 팀장이 검토한 후 알림으로 전달됨. 연차 사용 내역은 마이페이지에서 확인 가능." \
---system_prompt "당신은 회사 내 직원들의 질문에 답변하는 AI 도우미입니다. 아래 참고 문서를 기반으로 질문에 대해 정확하고 친절하게 답변해 주세요. 문서에 기반한 내용 외에는 추측하지 마세요.." \
+--model_name "Qwen/Qwen2-0.5B-Instruct" 
+--device cpu 
+--boost_factor 2.5 
+--max_length 512 
+--temperature 0.8 
+--top_p 0.85 
+--system_prompt "당신은 회사 내 직원들의 질문에 답변하는 AI 도우미입니다. 아래 참고 문서를 기반으로 질문에 대해 정확하고 친절하게 답변해 주세요. 문서에 기반한 내용 외에는 추측하지 마세요.." 
+--user_query "연차 신청은 어디서 하나요?" 
+--chunks "연차는 그룹웨어 시스템을 통해 신청할 수 있다. 로그인 후 '근태관리 > 휴가신청' 메뉴에서 작성하면 됨. 승인 여부는 팀장이 검토한 후 알림으로 전달됨. 연차 사용 내역은 마이페이지에서 확인 가능." 
 --content_template "{user_query}\n\n[참고 문서]\n{chunks}\n\n위 내용을 참고해서 사용자 질문에 친절하고 정확하게 답변해 주세요."
 
 
---- CiteProcessor 미적용 ---
+--- SelectiveCiteProcessor 미적용 ---
 죄송합니다, 저는 인공지능의 모델로 인식되지 않으며 현재 지원된 옵션이나 서비스에 대한 정보를 제공하기 어렵습니다. 직접 사용하여 연차 신청 또는 이메일을 보내주시면 감사하겠습니다.
 
---- CiteProcessor 적용 ---
+--- SelectiveCiteProcessor 적용 ---
 연차 신청은 그룹웨어 시스템을 통해 사용할 수 있습니다. 로그인 후 '근태관리 > 휴가신청' 메뉴에서 작성하면 됩니다. 승인 여부는 팀장이 검토한 후 알림으로 전달되며, 연차 사용 내역은 마이페이지에서 확인할 수 있습니다. 사용자에게는 이메일 또는 메시지 메뉴에서 연차 신청을 확인할 수 있습니다.
 ```
 
 ## 실행
 ```
-python selective_cite_processor.py \
+python3 selective_cite_processor.py \
     --model_name "Qwen/Qwen2-0.5B-Instruct" \
-    --device cuda \
-    --boost_factor 2.0 \
-    --max_length 256 \
-    --temperature 0.9 \
-    --top_p 0.85 \ 
-    --user_query "오케스트로를 설명해줘." \
-    --chunks "대표 서비스: 클라우드, AI \n회사 위치: 파크원" \n 전화번호: 111-111 \
-    --system_prompt "너는 아래 참고 내용을 바탕으로 답변하는 챗봇이야." \
-    --content_template "질문: {user_query}\n\n[참고자료]\n{chunks}\n\n답변:"
+    --device cpu \
+    --boost_factor 2.5 \
+    --max_length 512 \
+    --temperature 0.8 \
+    --top_p 0.85 \
+    --user_query "연차 신청은 어디서 하나요?" \
+    --chunks "연차는 그룹웨어 시스템을 통해 신청할 수 있다. 로그인 후 '근태관리 > 휴가신청' 메뉴에서 작성하면 됨. 승인 여부는 팀장이 검토한 후 알림으로 전달됨. 연차 사용 내역은 마이페이지에서 확인 가능." \
+    --system_prompt "당신은 회사 내 직원들의 질문에 답변하는 AI 도우미입니다. 아래 참고 문서를 기반으로 질문에 대해 정확하고 친절하게 답변해 주세요. 문서에 기반한 내용 외에는 추측하지 마세요.." \
+    --content_template "{user_query}\n\n[참고 문서]\n{chunks}\n\n위 내용을 참고해서 사용자 질문에 친절하고 정확하게 답변해 주세요."
 ```
 ## 
 
