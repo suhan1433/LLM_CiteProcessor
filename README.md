@@ -10,6 +10,9 @@ SelectiveCiteProcessor는 프롬프트 중 사용자가 지정한 특정 부분�
 
 이 방식은 중요 정보를 정확하게 포함해야 하는 테스크에서 효과적인 결과를 보였습니다.
 
+<img width="991" height="539" alt="image" src="https://github.com/user-attachments/assets/cbbfd5fe-2a51-4e1b-9018-5be66acde1a0" />
+
+
 ## 예시
 ```python
 --model_name "Qwen/Qwen2-0.5B-Instruct" 
